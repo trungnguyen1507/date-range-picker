@@ -1,0 +1,12 @@
+.calendar-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.calendar-wrapper.dark {
+  background-color: #0a1929;
+}

@@ -1,0 +1,106 @@
+.calendar-container {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.month-header {
+  margin: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.nav-button {
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.nav-button:hover {
+  background-color: #0056b3;
+  color: white;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.calendar-table th,
+.calendar-table td {
+  width: 14.28%;
+  height: 40px;
+  text-align: center;
+}
+
+.day-elem {
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.day-elem:hover {
+  background-color: #f2f2f2;
+}
+
+.day-elem.start-day,
+.day-elem.end-day {
+  background-color: #007bff;
+  color: white;
+}
+
+.day-elem.in-range,
+.day-elem.current-day.in-range {
+  background-color: #cce5ff;
+}
+
+.day-elem.current-day {
+  border: 1px solid #28a745;
+}
+
+.months-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.single-month {
+  margin: 0 10px;
+  width: 300px;
+}
+
+.calendar-container.dark {
+  color: white;
+  background-color: #000;
+}
+
+.calendar-container.dark .day-elem:hover {
+  color: #0a1929;
+}
+
+.calendar-container.dark .day-elem.start-day,
+.calendar-container.dark .day-elem.end-day {
+  background-color: #42a5f5;
+  color: #0a1929;
+}
+
+.calendar-container.dark .day-elem.in-range,
+.calendar-container.dark .day-elem.current-day.in-range {
+  color: #0a1929;
+}
+
+.calendar-container.dark .nav-button {
+  color: white;
+}
