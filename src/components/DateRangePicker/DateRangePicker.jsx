@@ -1,16 +1,13 @@
 import { useState } from 'react'
 import Calendar from '../Calendar/Calendar'
-import Box from '@mui/material/Box'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
-import Select from '@mui/material/Select'
+import { MODE_TYPE } from '../../utils/constants'
 import './DateRangePicker.css'
+import { ThemeMode } from '../ThemeMode/ThemeMode'
 
 const DateRangePicker = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDateRange, setSelectedDateRange] = useState({ start: null, end: null })
-  const [mode, setMode] = useState('light')
+  const [mode, setMode] = useState(MODE_TYPE.LIGHT)
 
   const handleChange = (event) => {
     setMode(event.target.value)
@@ -41,36 +38,10 @@ const DateRangePicker = () => {
       }
     }
   }
-  console.log(selectedDateRange)
 
   return (
-    <div className={mode === 'light' ? 'calendar-wrapper' : 'calendar-wrapper dark'}>
-      <Box sx={{ minWidth: 120, pb: 2 }}>
-        <FormControl fullWidth>
-          <InputLabel sx={{ color: mode === 'light' ? '' : 'white' }} id='demo-simple-select-label'>
-            Mode
-          </InputLabel>
-          <Select
-            labelId='demo-simple-select-label'
-            id='demo-simple-select'
-            value={mode}
-            label='Mode'
-            onChange={handleChange}
-            sx={{
-              color: mode === 'light' ? '' : 'white',
-              '.MuiOutlinedInput-notchedOutline': {
-                borderColor: mode === 'light' ? '' : 'white'
-              },
-              '.MuiSvgIcon-root': {
-                color: mode === 'light' ? '' : 'white'
-              }
-            }}
-          >
-            <MenuItem value='light'>Light</MenuItem>
-            <MenuItem value='dark'>Dark</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
+    <div className={mode === MODE_TYPE.LIGHT ? 'calendar-wrapper' : 'calendar-wrapper dark'}>
+      <ThemeMode mode={mode} onModeChange={handleChange} />
       <Calendar
         date={currentDate}
         onPrevMonth={handlePrevMonth}

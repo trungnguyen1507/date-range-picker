@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
+import { findNumberOfDaysInMonth, findFirstDayOfMonth, isCurrentMonthDay } from '../../utils/dateTime'
+import { MONTH_NAMES, MODE_TYPE, DAYS_IN_WEEK, NO_DAYS_IN_WEEK } from '../../utils/constants'
 import './Calendar.css'
 
 const Calendar = ({ date, onPrevMonth, onNextMonth, selectedDateRange, onDateClick, mode }) => {
@@ -12,46 +14,28 @@ const Calendar = ({ date, onPrevMonth, onNextMonth, selectedDateRange, onDateCli
     setNextMonthDate(new Date(date.getFullYear(), date.getMonth() + 1))
   }, [date])
 
-  const daysInMonth = (year, month) => {
-    return new Date(year, month + 1, 0).getDate()
-  }
-  const firstDayOfMonth = (year, month) => {
-    return new Date(year, month, 1).getDay()
-  }
-
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ]
-
   const generateCalendar = (currentDate) => {
-    const weeks = []
+    let weeks = []
     let currentWeek = []
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth()
+    const firstDayOfMonth = findFirstDayOfMonth(year, month)
+    const daysInMonth = findNumberOfDaysInMonth(year, month)
 
-    for (let i = 0; i < firstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth()); i++) {
+    for (let i = 0; i < firstDayOfMonth; i++) {
       currentWeek.push(null)
     }
 
-    for (let i = 1; i <= daysInMonth(currentDate.getFullYear(), currentDate.getMonth()); i++) {
+    for (let i = 1; i <= daysInMonth; i++) {
       currentWeek.push(i)
-      if (currentWeek.length === 7) {
+      if (currentWeek.length === DAYS_IN_WEEK) {
         weeks.push(currentWeek)
         currentWeek = []
       }
     }
 
-    if (currentWeek.length > 0) {
-      while (currentWeek.length < 7) {
+    if (currentWeek.length > NO_DAYS_IN_WEEK) {
+      while (currentWeek.length < DAYS_IN_WEEK) {
         currentWeek.push(null)
       }
       weeks.push(currentWeek)
@@ -60,17 +44,11 @@ const Calendar = ({ date, onPrevMonth, onNextMonth, selectedDateRange, onDateCli
     return weeks
   }
 
-  const handlePrevMonth = () => {
-    onPrevMonth()
-  }
-
-  const handleNextMonth = () => {
-    onNextMonth()
-  }
-
   const handleDayClick = (day, currentDate) => {
-    const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
-    onDateClick(selectedDate)
+    if (day !== null) {
+      const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+      onDateClick(selectedDate)
+    }
   }
 
   const isSameDate = (date1, date2) => {
@@ -81,19 +59,34 @@ const Calendar = ({ date, onPrevMonth, onNextMonth, selectedDateRange, onDateCli
     )
   }
 
-  const isCurrentMonthDay = (year, month) => {
-    const today = new Date()
-    return today.getFullYear() === year && today.getMonth() === month
-  }
-
   const isInRange = (day, currentDate) => {
     if (!selectedDateRange.start || !selectedDateRange.end) return false
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
     return date >= selectedDateRange.start && date <= selectedDateRange.end
   }
 
+  const getClassName = (day, currentDate) => {
+    const year = currentDate.getFullYear()
+    const month = currentDate.getMonth()
+    const selectedDate = new Date(year, month, day)
+    if (day !== null) {
+      if (isSameDate(selectedDateRange.start, selectedDate)) {
+        return 'day-elem start-day'
+      } else if (isSameDate(selectedDateRange.end, selectedDate)) {
+        return 'day-elem end-day'
+      } else if (isInRange(day, currentDate) && isCurrentMonthDay(year, month) && new Date().getDate() === day) {
+        return 'day-elem current-day in-range'
+      } else if (isCurrentMonthDay(year, month) && new Date().getDate() === day) {
+        return 'day-elem current-day'
+      } else if (isInRange(day, currentDate)) {
+        return 'day-elem in-range'
+      } else {
+        return 'day-elem'
+      }
+    }
+  }
+
   const renderCalendarTable = (currentDate) => {
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth())
     const weeks = generateCalendar(currentDate)
 
     return (
@@ -110,36 +103,17 @@ const Calendar = ({ date, onPrevMonth, onNextMonth, selectedDateRange, onDateCli
           </tr>
         </thead>
         <tbody>
-          {weeks.map((week, index) => (
-            <tr key={index}>
-              {week.map((day, index) =>
-                day === null ? (
-                  <td key={index}></td>
-                ) : (
-                  <td
-                    key={index}
-                    className={
-                      isSameDate(selectedDateRange.start, new Date(date.getFullYear(), date.getMonth(), day))
-                        ? 'day-elem start-day'
-                        : isSameDate(selectedDateRange.end, new Date(date.getFullYear(), date.getMonth(), day))
-                        ? 'day-elem end-day'
-                        : isInRange(day, currentDate) &&
-                          isCurrentMonthDay(currentDate.getFullYear(), currentDate.getMonth()) &&
-                          new Date().getDate() === day
-                        ? 'day-elem current-day in-range'
-                        : isCurrentMonthDay(currentDate.getFullYear(), currentDate.getMonth()) &&
-                          new Date().getDate() === day
-                        ? 'day-elem current-day'
-                        : isInRange(day, currentDate)
-                        ? 'day-elem in-range'
-                        : 'day-elem'
-                    }
-                    onClick={() => handleDayClick(day, currentDate)}
-                  >
-                    {day}
-                  </td>
-                )
-              )}
+          {weeks.map((week, weekIndex) => (
+            <tr key={`week-${weekIndex}`}>
+              {week.map((day, dayIndex) => (
+                <td
+                  key={`day-${dayIndex}`}
+                  className={getClassName(day, currentDate)}
+                  onClick={() => handleDayClick(day, currentDate)}
+                >
+                  {day === null ? '' : day}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>
@@ -148,18 +122,18 @@ const Calendar = ({ date, onPrevMonth, onNextMonth, selectedDateRange, onDateCli
   }
 
   return (
-    <div className={mode === 'light' ? 'calendar-container' : 'calendar-container dark'}>
+    <div className={mode === MODE_TYPE.LIGHT ? 'calendar-container' : 'calendar-container dark'}>
       <div className='button-container'>
-        <button className='nav-button' onClick={handlePrevMonth}>
+        <button className='nav-button' onClick={onPrevMonth}>
           <KeyboardArrowLeftIcon />
         </button>
         <h2 className='month-header'>
-          {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+          {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
         <h2 className='month-header'>
-          {monthNames[nextMonthDate.getMonth()]} {nextMonthDate.getFullYear()}
+          {MONTH_NAMES[nextMonthDate.getMonth()]} {nextMonthDate.getFullYear()}
         </h2>
-        <button className='nav-button' onClick={handleNextMonth}>
+        <button className='nav-button' onClick={onNextMonth}>
           <KeyboardArrowRightIcon />
         </button>
       </div>
